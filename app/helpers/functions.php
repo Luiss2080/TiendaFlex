@@ -240,28 +240,119 @@ if (!function_exists('validate_email')) {
     }
 }
 
-if (!function_exists('upload_file')) {
+if (!function_exists('upload_allowed_mime_map')) {
     /**
-     * Subir archivo
+     * Mapa extensión permitida -> tipos MIME reales aceptados para esa
+     * extensión. Se usa para verificar el contenido real del archivo
+     * (magic bytes vía fileinfo), no lo que el navegador dice que es.
      */
-    function upload_file($file, $destination = 'uploads/') {
-        if (!isset($file['tmp_name']) || $file['error'] !== UPLOAD_ERR_OK) {
+    function upload_allowed_mime_map() {
+        return [
+            'jpg'  => ['image/jpeg'],
+            'jpeg' => ['image/jpeg'],
+            'png'  => ['image/png'],
+            'gif'  => ['image/gif'],
+            'webp' => ['image/webp'],
+        ];
+    }
+}
+
+if (!function_exists('upload_validate_file')) {
+    /**
+     * Valida un archivo subido contra una lista blanca de extensiones y
+     * el tipo MIME real detectado por su contenido (no por el nombre ni
+     * por el Content-Type que envía el cliente, que son trivialmente
+     * falsificables). Separado de upload_file() para poder probarlo con
+     * un archivo cualquiera en disco, sin pasar por una subida HTTP real.
+     *
+     * Devuelve la extensión validada (string) en éxito, o false.
+     */
+    function upload_validate_file($originalName, $tmpPath, $size, $allowedExtensions = null, $maxSize = null) {
+        $uploadConfig = config('app.upload', []);
+        $allowedExtensions = $allowedExtensions ?? ($uploadConfig['allowed_types'] ?? ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+        $maxSize = $maxSize ?? ($uploadConfig['max_size'] ?? 10485760);
+
+        if ($size <= 0 || $size > $maxSize) {
             return false;
         }
-        
-        $uploadPath = __DIR__ . '/../../public/' . $destination;
-        
+
+        if (!is_file($tmpPath)) {
+            return false;
+        }
+
+        // Solo se acepta la ÚLTIMA extensión (rechaza trucos de doble
+        // extensión tipo "shell.php.jpg" a nivel de nombre, aunque la
+        // verificación real de contenido de abajo es la que de verdad
+        // impide subir un .php disfrazado de imagen).
+        $extension = strtolower(pathinfo((string)$originalName, PATHINFO_EXTENSION));
+
+        if ($extension === '' || !in_array($extension, $allowedExtensions, true)) {
+            return false;
+        }
+
+        $mimeMap = upload_allowed_mime_map();
+        if (!isset($mimeMap[$extension])) {
+            // Extensión listada en la configuración pero sin mapeo MIME
+            // conocido aquí: por seguridad, se rechaza en vez de asumir.
+            return false;
+        }
+
+        $finfo = function_exists('finfo_open') ? finfo_open(FILEINFO_MIME_TYPE) : false;
+        $detectedMime = $finfo ? finfo_file($finfo, $tmpPath) : false;
+        // finfo_close() is redundant (and deprecated as of PHP 8.5, since
+        // finfo objects are now freed automatically) but still required
+        // on the older PHP versions this project targets (php >=7.4).
+        if ($finfo && PHP_VERSION_ID < 80500) {
+            finfo_close($finfo);
+        }
+
+        if (!$detectedMime || !in_array($detectedMime, $mimeMap[$extension], true)) {
+            return false;
+        }
+
+        return $extension;
+    }
+}
+
+if (!function_exists('upload_file')) {
+    /**
+     * Subir archivo de forma segura.
+     *
+     * A diferencia de la versión original, esto:
+     *  - Verifica que el archivo llegó por una subida HTTP real
+     *    (is_uploaded_file), no una ruta arbitraria del servidor.
+     *  - Valida extensión + tipo MIME real (ver upload_validate_file).
+     *  - Genera un nombre completamente nuevo (no reutiliza nada del
+     *    nombre original) para evitar path traversal, caracteres
+     *    peligrosos o extensiones dobles.
+     */
+    function upload_file($file, $destination = 'uploads/') {
+        if (!isset($file['tmp_name'], $file['error']) || $file['error'] !== UPLOAD_ERR_OK) {
+            return false;
+        }
+
+        if (!is_uploaded_file($file['tmp_name'])) {
+            return false;
+        }
+
+        $extension = upload_validate_file($file['name'] ?? '', $file['tmp_name'], $file['size'] ?? 0);
+        if ($extension === false) {
+            return false;
+        }
+
+        $uploadPath = __DIR__ . '/../../public/' . rtrim($destination, '/') . '/';
+
         if (!is_dir($uploadPath)) {
             mkdir($uploadPath, 0755, true);
         }
-        
-        $fileName = uniqid() . '_' . basename($file['name']);
+
+        $fileName = bin2hex(random_bytes(16)) . '.' . $extension;
         $fullPath = $uploadPath . $fileName;
-        
+
         if (move_uploaded_file($file['tmp_name'], $fullPath)) {
-            return $destination . $fileName;
+            return rtrim($destination, '/') . '/' . $fileName;
         }
-        
+
         return false;
     }
 }
