@@ -1,12 +1,8 @@
 {
-    "name": "zay-shop",
-    "description": "E-commerce website built with PHP MVC architecture",
-    "version": "1.0.0",
+    "name": "luiss2080/tiendaflex",
+    "description": "TiendaFlex: e-commerce catalog built with a custom PHP MVC framework",
     "require": {
         "php": ">=7.4"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^9.0"
     },
     "autoload": {
         "psr-4": {
@@ -15,6 +11,6 @@
         }
     },
     "scripts": {
-        "test": "vendor/bin/phpunit tests/"
+        "test": "php tests/run.php"
     }
 }
