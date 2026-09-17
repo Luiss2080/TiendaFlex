@@ -40,33 +40,33 @@
             
             <?php if (Session::hasFlash('success')): ?>
                 <div class="alert alert-success">
-                    <?php echo Session::flash('success'); ?>
+                    <?php echo htmlspecialchars(Session::flash('success'), ENT_QUOTES, 'UTF-8'); ?>
                 </div>
             <?php endif; ?>
-            
+
             <?php if (Session::hasFlash('error')): ?>
                 <div class="alert alert-danger">
-                    <?php echo Session::flash('error'); ?>
+                    <?php echo htmlspecialchars(Session::flash('error'), ENT_QUOTES, 'UTF-8'); ?>
                 </div>
             <?php endif; ?>
-            
+
             <div class="row">
                 <div class="form-group col-md-6 mb-3">
                     <label for="inputname">Name</label>
-                    <input type="text" class="form-control mt-1" id="name" name="name" placeholder="Name" value="<?php echo Session::get('old_name', ''); ?>" required>
+                    <input type="text" class="form-control mt-1" id="name" name="name" placeholder="Name" value="<?php echo htmlspecialchars(Session::get('old_name', ''), ENT_QUOTES, 'UTF-8'); ?>" required>
                 </div>
                 <div class="form-group col-md-6 mb-3">
                     <label for="inputemail">Email</label>
-                    <input type="email" class="form-control mt-1" id="email" name="email" placeholder="Email" value="<?php echo Session::get('old_email', ''); ?>" required>
+                    <input type="email" class="form-control mt-1" id="email" name="email" placeholder="Email" value="<?php echo htmlspecialchars(Session::get('old_email', ''), ENT_QUOTES, 'UTF-8'); ?>" required>
                 </div>
             </div>
             <div class="mb-3">
                 <label for="inputsubject">Subject</label>
-                <input type="text" class="form-control mt-1" id="subject" name="subject" placeholder="Subject" value="<?php echo Session::get('old_subject', ''); ?>" required>
+                <input type="text" class="form-control mt-1" id="subject" name="subject" placeholder="Subject" value="<?php echo htmlspecialchars(Session::get('old_subject', ''), ENT_QUOTES, 'UTF-8'); ?>" required>
             </div>
             <div class="mb-3">
                 <label for="inputmessage">Message</label>
-                <textarea class="form-control mt-1" id="message" name="message" placeholder="Message" rows="8" required><?php echo Session::get('old_message', ''); ?></textarea>
+                <textarea class="form-control mt-1" id="message" name="message" placeholder="Message" rows="8" required><?php echo htmlspecialchars(Session::get('old_message', ''), ENT_QUOTES, 'UTF-8'); ?></textarea>
             </div>
             <div class="row">
                 <div class="col text-end mt-2">
