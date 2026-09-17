@@ -1,6 +1,7 @@
 {
     "name": "luiss2080/tiendaflex",
     "description": "TiendaFlex: e-commerce catalog built with a custom PHP MVC framework",
+    "version": "1.0.0",
     "require": {
         "php": ">=7.4"
     },

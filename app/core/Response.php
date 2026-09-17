@@ -26,14 +26,23 @@ class Response
 
     public function send()
     {
-        // Establecer código de estado
-        http_response_code($this->statusCode);
-        
-        // Establecer headers
-        foreach ($this->headers as $name => $value) {
-            header("$name: $value");
+        // Emitir código de estado y cabeceras solo cuando hay una
+        // petición HTTP real detrás (servidor web real, o el servidor
+        // embebido de PHP, cuyo SAPI es "cli-server"). Bajo el SAPI
+        // "cli" puro (scripts de línea de comandos, incluidos los
+        // tests automatizados de tests/run.php) no existe una
+        // respuesta HTTP a la que ponerle cabeceras, y llamar de todos
+        // modos a http_response_code()/header() solo genera avisos de
+        // PHP ("headers already sent") en cuanto cualquier otra cosa
+        // ya escribió algo a stdout antes.
+        if (PHP_SAPI !== 'cli') {
+            http_response_code($this->statusCode);
+
+            foreach ($this->headers as $name => $value) {
+                header("$name: $value");
+            }
         }
-        
+
         // Enviar contenido
         echo $this->content;
     }
