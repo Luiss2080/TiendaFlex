@@ -1,6 +1,6 @@
 {
-    "name": "zay-shop",
-    "description": "E-commerce website built with PHP MVC architecture",
+    "name": "luiss2080/tiendaflex",
+    "description": "E-commerce website built with a custom PHP MVC architecture",
     "version": "1.0.0",
     "require": {
         "php": ">=7.4"
