@@ -9,6 +9,7 @@ class Request
     private $post = [];
     private $files = [];
     private $headers = [];
+    private $jsonBody = null;
 
     public function __construct()
     {
@@ -57,6 +58,26 @@ class Request
     public function getHeader($name)
     {
         return $this->headers[strtolower($name)] ?? null;
+    }
+
+    /**
+     * Cuerpo JSON de la petición (para peticiones AJAX con
+     * Content-Type: application/json, donde $_POST siempre está vacío).
+     * Se parsea una sola vez y se cachea.
+     */
+    public function getJson($key = null, $default = null)
+    {
+        if ($this->jsonBody === null) {
+            $raw = file_get_contents('php://input');
+            $decoded = json_decode((string)$raw, true);
+            $this->jsonBody = is_array($decoded) ? $decoded : [];
+        }
+
+        if ($key === null) {
+            return $this->jsonBody;
+        }
+
+        return $this->jsonBody[$key] ?? $default;
     }
 
     public function isPost()
