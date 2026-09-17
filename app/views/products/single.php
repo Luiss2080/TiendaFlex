@@ -21,7 +21,7 @@
         <div class="row">
             <div class="col-lg-5 mt-5">
                 <div class="card mb-3">
-                    <img class="card-img img-fluid" src="/assets/img/<?php echo $product['image'] ?? 'product_single_01.jpg'; ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" id="product-detail">
+                    <img class="card-img img-fluid" src="<?php echo View::asset('img/'); ?><?php echo $product['image'] ?? 'product_single_01.jpg'; ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" id="product-detail">
                 </div>
                 <div class="row">
                     <!--Start Controls-->
@@ -42,17 +42,17 @@
                                 <div class="row">
                                     <div class="col-4">
                                         <a href="#">
-                                            <img class="card-img img-fluid" src="/assets/img/<?php echo $product['image'] ?? 'product_single_01.jpg'; ?>" alt="Product Image">
+                                            <img class="card-img img-fluid" src="<?php echo View::asset('img/'); ?><?php echo $product['image'] ?? 'product_single_01.jpg'; ?>" alt="Product Image">
                                         </a>
                                     </div>
                                     <div class="col-4">
                                         <a href="#">
-                                            <img class="card-img img-fluid" src="/assets/img/product_single_02.jpg" alt="Product Image">
+                                            <img class="card-img img-fluid" src="<?php echo View::asset('img/'); ?>product_single_02.jpg" alt="Product Image">
                                         </a>
                                     </div>
                                     <div class="col-4">
                                         <a href="#">
-                                            <img class="card-img img-fluid" src="/assets/img/product_single_03.jpg" alt="Product Image">
+                                            <img class="card-img img-fluid" src="<?php echo View::asset('img/'); ?>product_single_03.jpg" alt="Product Image">
                                         </a>
                                     </div>
                                 </div>
@@ -64,17 +64,17 @@
                                 <div class="row">
                                     <div class="col-4">
                                         <a href="#">
-                                            <img class="card-img img-fluid" src="/assets/img/product_single_04.jpg" alt="Product Image">
+                                            <img class="card-img img-fluid" src="<?php echo View::asset('img/'); ?>product_single_04.jpg" alt="Product Image">
                                         </a>
                                     </div>
                                     <div class="col-4">
                                         <a href="#">
-                                            <img class="card-img img-fluid" src="/assets/img/product_single_05.jpg" alt="Product Image">
+                                            <img class="card-img img-fluid" src="<?php echo View::asset('img/'); ?>product_single_05.jpg" alt="Product Image">
                                         </a>
                                     </div>
                                     <div class="col-4">
                                         <a href="#">
-                                            <img class="card-img img-fluid" src="/assets/img/product_single_06.jpg" alt="Product Image">
+                                            <img class="card-img img-fluid" src="<?php echo View::asset('img/'); ?>product_single_06.jpg" alt="Product Image">
                                         </a>
                                     </div>
                                 </div>
@@ -86,17 +86,17 @@
                                 <div class="row">
                                     <div class="col-4">
                                         <a href="#">
-                                            <img class="card-img img-fluid" src="/assets/img/product_single_07.jpg" alt="Product Image">
+                                            <img class="card-img img-fluid" src="<?php echo View::asset('img/'); ?>product_single_07.jpg" alt="Product Image">
                                         </a>
                                     </div>
                                     <div class="col-4">
                                         <a href="#">
-                                            <img class="card-img img-fluid" src="/assets/img/product_single_08.jpg" alt="Product Image">
+                                            <img class="card-img img-fluid" src="<?php echo View::asset('img/'); ?>product_single_08.jpg" alt="Product Image">
                                         </a>
                                     </div>
                                     <div class="col-4">
                                         <a href="#">
-                                            <img class="card-img img-fluid" src="/assets/img/product_single_09.jpg" alt="Product Image">
+                                            <img class="card-img img-fluid" src="<?php echo View::asset('img/'); ?>product_single_09.jpg" alt="Product Image">
                                         </a>
                                     </div>
                                 </div>
@@ -221,7 +221,7 @@
                             <div class="col-3">
                                 <div class="card mb-4 product-wap rounded-0">
                                     <div class="card rounded-0">
-                                        <img class="card-img rounded-0 img-fluid" src="/assets/img/<?php echo $relatedProduct['image'] ?? 'shop_01.jpg'; ?>">
+                                        <img class="card-img rounded-0 img-fluid" src="<?php echo View::asset('img/'); ?><?php echo $relatedProduct['image'] ?? 'shop_01.jpg'; ?>">
                                         <div class="card-img-overlay rounded-0 product-overlay d-flex align-items-center justify-content-center">
                                             <ul class="list-unstyled">
                                                 <li><a class="btn btn-success text-white" href="/shop/product/<?php echo $relatedProduct['id']; ?>"><i class="far fa-heart"></i></a></li>
@@ -251,7 +251,7 @@
                         <div class="col-3">
                             <div class="card mb-4 product-wap rounded-0">
                                 <div class="card rounded-0">
-                                    <img class="card-img rounded-0 img-fluid" src="/assets/img/shop_04.jpg">
+                                    <img class="card-img rounded-0 img-fluid" src="<?php echo View::asset('img/'); ?>shop_04.jpg">
                                     <div class="card-img-overlay rounded-0 product-overlay d-flex align-items-center justify-content-center">
                                         <ul class="list-unstyled">
                                             <li><a class="btn btn-success text-white" href="/shop/product/4"><i class="far fa-heart"></i></a></li>
@@ -269,7 +269,7 @@
                         <div class="col-3">
                             <div class="card mb-4 product-wap rounded-0">
                                 <div class="card rounded-0">
-                                    <img class="card-img rounded-0 img-fluid" src="/assets/img/shop_05.jpg">
+                                    <img class="card-img rounded-0 img-fluid" src="<?php echo View::asset('img/'); ?>shop_05.jpg">
                                     <div class="card-img-overlay rounded-0 product-overlay d-flex align-items-center justify-content-center">
                                         <ul class="list-unstyled">
                                             <li><a class="btn btn-success text-white" href="/shop/product/5"><i class="far fa-heart"></i></a></li>

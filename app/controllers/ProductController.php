@@ -71,7 +71,7 @@ class ProductController extends Controller
         }
         
         if (!$product) {
-            http_response_code(404);
+            $this->response->setStatusCode(404);
             $data = ['title' => '404 - Product Not Found'];
             return $this->renderWithLayout('errors/404', $data);
         }
@@ -94,31 +94,85 @@ class ProductController extends Controller
         return $this->renderWithLayout('products/single', $data);
     }
 
-    public function byCategory()
+    /**
+     * Listado de productos filtrados por categoría: /shop/category/{id}
+     *
+     * Nota: mientras el catálogo siga usando datos de ejemplo en memoria
+     * (ver Product::getSampleProducts), este método filtra sobre esos
+     * mismos datos en lugar de golpear la base de datos real, igual que
+     * index(). Esto evita depender de una conexión MySQL para navegar
+     * el catálogo de muestra.
+     */
+    public function category($id)
     {
-        $categorySlug = $this->request->getParam('category');
-        
-        $category = $this->categoryModel->findBySlug($categorySlug);
-        
-        if (!$category) {
-            $this->redirect('/error/404');
+        $categories = $this->productModel->getSampleCategories();
+        $currentCategory = null;
+        foreach ($categories as $cat) {
+            if ((string)$cat['id'] === (string)$id) {
+                $currentCategory = $cat;
+                break;
+            }
         }
 
-        // Obtener productos de la categoría
-        $page = (int)$this->getQuery('page', 1);
-        $products = $this->productModel->paginate($page, 12, 'category_id = :category', ['category' => $category['id']]);
+        if (!$currentCategory) {
+            $this->response->setStatusCode(404);
+            $data = ['title' => '404 - Category Not Found'];
+            return $this->renderWithLayout('errors/404', $data);
+        }
+
+        $page = (int)($_GET['page'] ?? 1);
+        $sort = $_GET['sort'] ?? 'featured';
+
+        $filters = [
+            'page' => $page,
+            'per_page' => 9,
+            'category' => $id,
+            'sort' => $sort
+        ];
+
+        $productsResult = $this->productModel->getSampleProducts($filters);
 
         $data = [
-            'title' => $category['name'] . ' - Zay Shop',
-            'category' => $category,
-            'products' => $products,
-            'breadcrumb' => [
-                ['title' => 'Home', 'url' => '/'],
-                ['title' => 'Shop', 'url' => '/products'],
-                ['title' => $category['name']]
+            'title' => $currentCategory['name'] . ' - Zay Shop',
+            'meta_description' => 'Shop ' . $currentCategory['name'] . ' at Zay Shop',
+            'products' => $productsResult['data'],
+            'categories' => $categories,
+            'pagination' => [
+                'current_page' => $page,
+                'per_page' => 9,
+                'total' => $productsResult['total'],
+                'has_more' => $productsResult['has_more']
+            ],
+            'filters' => [
+                'category' => $id,
+                'sort' => $sort,
+                'search' => null
             ]
         ];
 
-        return $this->renderWithLayout('categories/show', $data);
+        return $this->renderWithLayout('products/shop', $data);
+    }
+
+    /**
+     * Búsqueda de productos: GET /api/search?q=termino
+     *
+     * Devuelve JSON. La búsqueda se hace en memoria sobre los datos de
+     * ejemplo (stripos), por lo que no hay concatenación de SQL con
+     * entrada del usuario en ningún punto de este método.
+     */
+    public function search()
+    {
+        $query = trim((string)($_GET['q'] ?? $_GET['search'] ?? ''));
+
+        $result = $this->productModel->getSampleProducts([
+            'search' => $query,
+            'per_page' => 50
+        ]);
+
+        return $this->json([
+            'query' => $query,
+            'total' => $result['total'],
+            'results' => $result['data']
+        ]);
     }
 }
