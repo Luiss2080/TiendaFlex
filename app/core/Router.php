@@ -115,10 +115,13 @@ class Router
             
             if (class_exists($controllerClass)) {
                 $controller = new $controllerClass();
-                
+
                 if (method_exists($controller, $method)) {
-                    $result = $controller->$method();
-                    
+                    // Pasar los parámetros extraídos de la ruta (p. ej. {id})
+                    // como argumentos posicionales del método del controlador.
+                    $routeParams = array_values($this->request->getParams());
+                    $result = call_user_func_array([$controller, $method], $routeParams);
+
                     if ($result !== null) {
                         $this->response->setContent($result);
                         $this->response->send();
