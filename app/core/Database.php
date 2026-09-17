@@ -3,29 +3,23 @@
 class Database
 {
     private static $instance = null;
-    private $connection;
+    private $connection = null;
+    private $config;
 
     private function __construct()
     {
-        $config = [
+        // Solo se guarda la configuración aquí. La conexión PDO real se
+        // abre de forma perezosa (ver connect()) la primera vez que algo
+        // ejecuta una consulta real. Muchas páginas del sitio (home, shop,
+        // ficha de producto) todavía funcionan con datos de ejemplo en
+        // memoria y no deberían fallar solo porque MySQL no esté disponible.
+        $this->config = [
             'host' => $_ENV['DB_HOST'] ?? 'localhost',
             'dbname' => $_ENV['DB_NAME'] ?? 'zay_shop',
             'username' => $_ENV['DB_USER'] ?? 'root',
             'password' => $_ENV['DB_PASS'] ?? '',
             'charset' => $_ENV['DB_CHARSET'] ?? 'utf8mb4'
         ];
-
-        try {
-            $dsn = "mysql:host={$config['host']};dbname={$config['dbname']};charset={$config['charset']}";
-            
-            $this->connection = new PDO($dsn, $config['username'], $config['password'], [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES => false
-            ]);
-        } catch (PDOException $e) {
-            throw new Exception('Error de conexión a la base de datos: ' . $e->getMessage());
-        }
     }
 
     public static function getInstance()
@@ -36,15 +30,33 @@ class Database
         return self::$instance;
     }
 
+    private function connect()
+    {
+        try {
+            $dsn = "mysql:host={$this->config['host']};dbname={$this->config['dbname']};charset={$this->config['charset']}";
+
+            $this->connection = new PDO($dsn, $this->config['username'], $this->config['password'], [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false
+            ]);
+        } catch (PDOException $e) {
+            throw new Exception('Error de conexión a la base de datos: ' . $e->getMessage());
+        }
+    }
+
     public function getConnection()
     {
+        if ($this->connection === null) {
+            $this->connect();
+        }
         return $this->connection;
     }
 
     public function query($sql, $params = [])
     {
         try {
-            $stmt = $this->connection->prepare($sql);
+            $stmt = $this->getConnection()->prepare($sql);
             $stmt->execute($params);
             return $stmt;
         } catch (PDOException $e) {
@@ -96,16 +108,16 @@ class Database
 
     public function beginTransaction()
     {
-        return $this->connection->beginTransaction();
+        return $this->getConnection()->beginTransaction();
     }
 
     public function commit()
     {
-        return $this->connection->commit();
+        return $this->getConnection()->commit();
     }
 
     public function rollback()
     {
-        return $this->connection->rollback();
+        return $this->getConnection()->rollback();
     }
 }
