@@ -71,7 +71,7 @@ class ProductController extends Controller
         }
         
         if (!$product) {
-            http_response_code(404);
+            $this->response->setStatusCode(404);
             $data = ['title' => '404 - Product Not Found'];
             return $this->renderWithLayout('errors/404', $data);
         }
@@ -115,7 +115,7 @@ class ProductController extends Controller
         }
 
         if (!$currentCategory) {
-            http_response_code(404);
+            $this->response->setStatusCode(404);
             $data = ['title' => '404 - Category Not Found'];
             return $this->renderWithLayout('errors/404', $data);
         }
