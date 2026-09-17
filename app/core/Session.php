@@ -85,6 +85,16 @@ class Session
     public static function validateCsrf($token)
     {
         self::start();
+
+        // hash_equals() requires a string for both arguments since PHP 8;
+        // a request that omits the CSRF token entirely (very much the
+        // expected case for an attacker, or for a broken client) passes
+        // null here, which previously caused an uncaught TypeError
+        // instead of a clean "invalid token" rejection.
+        if (!is_string($token)) {
+            return false;
+        }
+
         return hash_equals($_SESSION['csrf_token'] ?? '', $token);
     }
 
