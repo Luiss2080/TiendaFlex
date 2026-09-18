@@ -1,119 +1,161 @@
-# 🛍️ TiendaFlex
+<div align="center">
+  <img src="docs/assets/logo.svg" width="96" alt="Logo de TiendaFlex" />
+  <h1>TiendaFlex</h1>
+  <p><b>Catálogo de e-commerce sobre un mini-framework MVC en PHP puro, con carrito seguro en sesión.</b></p>
+  <img src="https://img.shields.io/badge/estado-MVP%20de%20cat%C3%A1logo-f97316?style=for-the-badge" alt="Estado: MVP de catálogo" />
+  <img src="https://img.shields.io/badge/PHP-%E2%89%A5%207.4-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 7.4 o superior" />
+  <img src="https://img.shields.io/badge/tests-17%20OK-2ea44f?style=for-the-badge" alt="17 tests" />
+  <a href="https://github.com/Luiss2080/TiendaFlex/actions/workflows/ci.yml"><img src="https://github.com/Luiss2080/TiendaFlex/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <p>
+    <a href="#-inicio-rápido">Inicio rápido</a> ·
+    <a href="#-características">Características</a> ·
+    <a href="#️-arquitectura">Arquitectura</a> ·
+    <a href="#-pruebas">Pruebas</a> ·
+    <a href="#-lo-que-todavía-no-existe">Limitaciones</a>
+  </p>
+</div>
 
-> Catálogo de e-commerce construido con un framework MVC en PHP puro, hecho
-> desde cero (sin Laravel/Symfony/etc.): routing con parámetros, modelos
-> sobre PDO con consultas parametrizadas, protección CSRF y un carrito de
-> compras en sesión que nunca confía en el precio que manda el cliente.
-> Pensado como base de aprendizaje/portafolio para quien quiera ver cómo
-> se arma un mini-framework MVC por dentro.
+TiendaFlex es una tienda en línea hecha **sin Laravel ni Symfony**: un router con
+parámetros, controladores, modelos sobre PDO, vistas con layouts y un carrito en
+sesión que nunca confía en el precio que envía el navegador. Hoy el catálogo se
+sirve desde **datos de ejemplo en memoria** y **no es una tienda completa**: no hay
+cuentas, checkout ni pagos. Sirve como base de aprendizaje o portafolio.
 
-## Características
+## 🎬 Vista rápida
 
-Verificadas contra el código real de este repositorio:
+| Inicio | Tienda |
+|:--:|:--:|
+| <img src="docs/screenshots/home.png" alt="Página de inicio de TiendaFlex con banner y categorías" width="420" /> | <img src="docs/screenshots/shop.png" alt="Listado de productos con categorías y ordenamiento" width="420" /> |
 
-- **Framework MVC propio**: Router con parámetros de ruta (`/shop/product/{id}`),
-  Request/Response, Controller base, Model ligero sobre PDO, motor de vistas
-  con layouts (`app/core/*.php`).
-- **Catálogo de productos**: listado (`/shop`), detalle (`/shop/product/{id}`)
-  y filtrado por categoría (`/shop/category/{id}`), con productos
-  relacionados. Actualmente corre sobre datos de ejemplo en memoria
-  (`Product::getSampleProducts()`), no requiere base de datos para navegarse.
-- **Búsqueda y filtros**: búsqueda por texto (`/api/search`) y ordenamiento
-  (nombre A-Z/Z-A, precio ascendente/descendente) sobre el catálogo.
-- **Carrito de compras en sesión** (`/cart`, `/cart/add`, `/cart/update`,
-  `/cart/remove`, `/api/cart/count`): el precio de cada línea se resuelve
-  **siempre** del catálogo del servidor a partir del `product_id`, nunca de
-  un campo enviado por el cliente; la cantidad se valida y se limita a un
-  rango razonable.
-- **Formulario de contacto** (`/contact`) con validación server-side y envío
-  a un log (`logs/contact.log`); no envía correo real todavía.
-- **Protección CSRF real**: token por sesión, generado en cada página y
-  verificado en el servidor antes de cualquier envío de formulario o
-  llamada AJAX de estado (soporta tanto formularios clásicos como
-  `application/json`).
-- **Acceso a datos parametrizado**: todas las consultas SQL del proyecto
-  usan sentencias preparadas de PDO; no hay concatenación de entrada de
-  usuario en SQL en ningún punto del código.
-- **Helper de subida de archivos endurecido** (`upload_file()`): valida
-  extensión contra una lista blanca y el tipo MIME real del contenido
-  (no el nombre ni el `Content-Type` del cliente). Todavía no está
-  conectado a ningún formulario del sitio.
+<sub>Capturas reales de la app local con los productos de ejemplo (plantilla TemplateMo "Zay").</sub>
 
-### Limitaciones actuales (para no sobrevender)
+## ✨ Características
 
-- No hay autenticación, cuentas de usuario ni panel de administración
-  todavía (el formulario de "cerrar sesión" en el menú y el enlace de
-  login son solo interfaz, sin backend detrás).
-- No hay checkout ni pasarela de pago real: el carrito calcula totales
-  correctamente, pero no existe un flujo de "pagar" ni tablas de pedidos
-  conectadas.
-- El catálogo vive en datos de ejemplo en memoria; `database/schema.sql`
-  define el esquema real (productos, pedidos, pagos, reseñas, etc.) para
-  cuando se conecte el catálogo a MySQL de verdad.
+| Característica | Detalle |
+|---|---|
+| Framework MVC propio | `Router` con parámetros (`shop/product/{id}`), `Request`, `Response`, `Controller`, `Model` sobre PDO y `View` con layouts, todo en `app/core/`. |
+| Catálogo | Inicio, listado (`/shop`), ficha (`/shop/product/{id}`) y categoría (`/shop/category/{id}`). Datos de `Product::getSampleProducts()`; no necesita base de datos. |
+| Búsqueda y orden | `/api/search` y ordenamiento por nombre A-Z/Z-A y precio ascendente/descendente. |
+| Carrito en sesión | `/cart`, `/cart/add`, `/cart/update`, `/cart/remove`, `/api/cart/count`. El precio se resuelve **siempre en el servidor** desde el `product_id`; la cantidad se limita a 1-100 por artículo. |
+| CSRF | Token por sesión verificado en las peticiones POST del carrito y del contacto. |
+| Contacto | `/contact` valida en servidor y guarda el mensaje en `logs/contact.log`; no envía correo. |
+| SQL parametrizado | El acceso a datos usa sentencias preparadas de PDO. |
+| Subida de archivos | `upload_file()` valida extensión (lista blanca) y tipo MIME real. Aún no está conectada a ningún formulario. |
 
-## Cómo usar
+## 🏗️ Arquitectura
 
-1. Cloná el repositorio y entrá a la carpeta del proyecto.
-2. Copiá `.env.example` a `.env` y ajustá los valores si hace falta
-   (el catálogo de ejemplo funciona sin base de datos).
-3. Levantá el servidor embebido de PHP apuntando a `public/` como raíz.
-4. Navegá `/`, `/shop`, `/shop/product/1`, `/contact`, `/cart`.
+```mermaid
+flowchart LR
+    B["Navegador"] --> I["public/index.php"]
+    I --> R["Router (app/config/routes.php)"]
+    R --> C["Controllers: Home, Product, Cart, Page"]
+    C --> M["Models: Product, Category"]
+    M -. "hoy" .-> S["Datos de ejemplo en memoria"]
+    M -. "esquema listo" .-> D[("MySQL: database/schema.sql")]
+    C --> V["View + layouts (app/views)"]
+    C --> SS["Session (carrito, token CSRF)"]
+    V --> B
+```
 
-## Instalación y uso local
+## 🚀 Inicio rápido
+
+| Requisito | Versión |
+|---|---|
+| PHP | 7.4 o superior (probado en local con 8.5) |
+| Servidor | Apache con `mod_rewrite` (Laragon/XAMPP) o el servidor embebido con el router de abajo |
+| MySQL | Opcional: solo si vas a usar el esquema real |
+
+1. Clona el repositorio y crea tu configuración:
+   ```bash
+   git clone https://github.com/Luiss2080/TiendaFlex.git
+   cd TiendaFlex
+   cp .env.example .env
+   ```
+2. Ajusta `APP_URL` en `.env` a la URL desde la que vas a servir el sitio. **Es importante**: los enlaces a CSS/JS/imágenes se generan como `APP_URL/public/...`.
+3. Sirve la carpeta **raíz** del proyecto con Apache (el `.htaccess` redirige todo a `public/index.php`), por ejemplo en Laragon como `http://tiendaflex.test`. No lo probé con Apache; sí con el servidor embebido (abajo).
+4. Abre `/`, `/shop`, `/shop/product/1`, `/cart` y `/contact`.
+
+<details>
+<summary>Alternativa: servidor embebido de PHP (verificado en local)</summary>
+
+`php -S ... -t public` **no sirve** los estilos, porque los enlaces apuntan a `/public/...`. Un router mínimo, fuera del repositorio (por ejemplo `router-dev.php`), lo resuelve:
+
+```php
+<?php
+$root = __DIR__;              // raíz de TiendaFlex
+$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+if ($path !== '/' && is_file($root . $path)) { return false; } // archivos estáticos
+chdir($root . '/public');
+require $root . '/public/index.php';
+```
 
 ```bash
-git clone https://github.com/Luiss2080/TiendaFlex.git
-cd TiendaFlex
-
-cp .env.example .env
-
-# Servidor de desarrollo embebido de PHP (necesita PHP 7.4+)
-php -S localhost:8000 -t public public/index.php
+# con APP_URL=http://localhost:8000 en .env
+php -S localhost:8000 -t . router-dev.php
 ```
 
-Luego abrí `http://localhost:8000/` en el navegador.
+</details>
 
-Si vas a ejercitar rutas que sí golpean una base de datos real, creá el
-esquema con:
+<details>
+<summary>Variables de entorno (<code>.env.example</code>)</summary>
 
-```sql
-mysql -u root -p < database/schema.sql
+| Variable | Uso |
+|---|---|
+| `APP_NAME`, `APP_URL`, `APP_ENV`, `APP_DEBUG` | Datos de la aplicación; `APP_URL` construye los enlaces a assets |
+| `SESSION_LIFETIME`, `SESSION_NAME` | Sesión (por defecto 7200 s) |
+| `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASS`, `DB_CHARSET` | Solo si consultas MySQL real; el catálogo de ejemplo no las necesita |
+
+Para crear el esquema: `mysql -u root -p < database/schema.sql` (crea la base `zay_shop`). Ningún flujo actual del sitio depende de ella.
+
+</details>
+
+<details>
+<summary>Estructura de carpetas</summary>
+
+```
+app/
+  config/routes.php     # tabla de rutas
+  controllers/          # Home, Product, Cart, Page
+  core/                 # Router, Request, Response, Controller, Model, Database, Session, View
+  helpers/functions.php # env(), CSRF, upload_file(), etc.
+  models/               # Product, Category
+  views/                # layouts, home, products, cart, pages, errors
+config/                 # app.php, database.php
+database/schema.sql     # esquema MySQL (aún sin conectar al catálogo)
+public/                 # index.php, css, js, img, webfonts
+tests/                  # runner propio (php tests/run.php)
 ```
 
-y completá las variables `DB_*` en tu `.env`.
+</details>
 
-## Tecnologías
-
-- **Backend**: PHP puro (framework MVC propio, sin dependencias externas
-  en producción), PDO para acceso a datos.
-- **Frontend**: Bootstrap 5, jQuery, Slick Carousel, Font Awesome
-  (plantilla original de TemplateMo, adaptada a este framework).
-- **Base de datos**: MySQL/MariaDB (esquema en `database/schema.sql`).
-- **Tooling**: Composer (autoload PSR-4 y metadatos del paquete).
-
-## Tests
-
-Suite de pruebas propia, sin dependencias externas (corre con solo
-`php`, no requiere `composer install` ni PHPUnit):
+## 🧪 Pruebas
 
 ```bash
-php tests/run.php
-# o, equivalentemente:
-composer test
+php tests/run.php     # o: composer test
 ```
 
-Cubre, entre otras cosas: generación/verificación de tokens CSRF, que
-los parámetros de ruta llegan al controlador correcto, que el helper de
-subida de archivos rechaza contenido que no es una imagen real (aunque
-tenga extensión de imagen), y que el carrito calcula el total correcto
-ignorando cualquier precio manipulado por el cliente.
+Runner propio, sin PHPUnit ni `composer install`. Hay **17 pruebas** (todas pasan) que cubren tokens CSRF, paso de parámetros de ruta al controlador, rechazo de archivos que no son imágenes reales (incluido un script PHP disfrazado) y cálculo del carrito ignorando precios manipulados. El workflow `.github/workflows/ci.yml` ejecuta `php -l` y la suite en PHP 7.4, 8.1, 8.2 y 8.3.
 
-Hay además un workflow de GitHub Actions (`.github/workflows/ci.yml`)
-que corre `php -l` sobre todo el código y esta suite en cada push/PR,
-contra varias versiones de PHP.
+## 🔒 Seguridad
 
-## Licencia
+- CSRF por sesión en las operaciones POST del carrito y del contacto.
+- Precio y nombre del carrito se toman del catálogo del servidor, nunca del cliente.
+- Consultas con sentencias preparadas de PDO.
+- Subida de archivos con lista blanca de extensiones y verificación del MIME real.
+- Cookie de sesión con `httponly` y `SameSite=Lax`; `secure` está en `false` en `config/app.php` y debe activarse bajo HTTPS.
+- `.env` está en `.gitignore`; no subas credenciales reales.
 
-No se encontró un archivo `LICENSE` en este repositorio. Hasta que se
-agregue uno explícitamente, el código no tiene una licencia abierta
-declarada.
+## 🚧 Lo que todavía no existe
+
+- Autenticación, cuentas de usuario y panel de administración: el icono de usuario y el menú son solo interfaz.
+- Checkout, pagos y pedidos: el carrito calcula totales, pero no hay flujo de compra.
+- Catálogo en MySQL: `database/schema.sql` define productos, pedidos, pagos y reseñas, pero el sitio usa datos de ejemplo; los métodos de `Product` con SQL no están conectados a las páginas.
+- Envío de correo desde el formulario de contacto (solo escribe en `logs/contact.log`).
+- Textos e imágenes provienen de una plantilla de terceros (Zay/TemplateMo) y siguen en parte en inglés; la zona horaria por defecto es `America/Mexico_City`.
+- El servidor embebido de PHP con `-t public` no carga estilos sin el router descrito arriba.
+
+## 📄 Licencia
+
+Sin licencia definida: todos los derechos reservados por defecto. La plantilla visual original pertenece a TemplateMo.
+
+<div align="center"><sub>Hecho por Luiss2080 · PHP puro, sin frameworks</sub></div>
